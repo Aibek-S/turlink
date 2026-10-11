@@ -1,0 +1,13 @@
+{
+  "name": "turlink",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A link safety checking project",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@turlink/service",
+    "check": "npm run check --workspace=@turlink/service"
+  }
+}
