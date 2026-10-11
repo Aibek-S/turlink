@@ -60,6 +60,8 @@ Treat GitHub as the source of truth for work tracking and review:
 
 Direct pushes to `main` and force pushes to shared branches are not allowed. Follow `CONTRIBUTING.md`. Server-side branch protection must enforce at least one approval and disallow direct updates to `main`; do not assume that writing this policy down configures GitHub automatically.
 
+The repository's very first bootstrap commit was placed on `main` while initializing this empty repository, before a pull request could exist. This is a one-time repository setup exception, not a model for future changes. All subsequent commits must follow the issue and pull request workflow above.
+
 ## Handoff guidance
 
 Before implementing a feature, inspect the current code and issues instead of assuming this handoff is exhaustive. Preserve the privacy and safety constraints above, keep the first implementation small, and update this document when architecture or product behavior materially changes.
