@@ -15,7 +15,15 @@ The initial MVP lives in `apps/service` and is a command-line TypeScript program
 - Internationalized domain labels beginning with `xn--`.
 - Credentials embedded before the hostname.
 
-The CLI does not fetch or open a submitted URL, contact reputation services, inspect page content, or determine that a link is safe. No warnings means only that these few local checks found no listed signal. A warning is not proof of malicious intent.
+The CLI also has an explicitly opt-in VirusTotal domain reputation lookup: `pnpm dev -- --reputation <url>`. It normalizes and submits only the hostname to VirusTotal's v3 domain endpoint. The default local-only command never makes a network request, and a missing API key results in a clear non-network configuration message.
+
+The key is read only from `VIRUSTOTAL_API_KEY`. The repository includes `.env.example`; users can copy it to the ignored `.env` file for local development. A key must never be printed, logged, or committed. `pnpm dev -- --reputation-health` makes one authenticated request to VirusTotal's metadata endpoint to validate access without submitting a domain.
+
+Before a domain lookup, the CLI warns that VirusTotal is an external service and that queried indicators may be scanned and added to its dataset. Do not query sensitive, confidential, or personally identifiable domains. VirusTotal counts and report data are reputation signals only: zero detections or an absent report do not prove a domain is safe. The integration makes no automatic retries. HTTP authentication failures, missing reports, rate limits, network failures, and malformed responses are distinguished in user-facing output.
+
+VirusTotal public API limits are external plan constraints, not application guarantees. Their current documentation commonly states 4 requests per minute and 500 per day for the public tier; those terms can change and may differ by account. Review the current VirusTotal documentation and Terms before using a key in a project.
+
+The default local-only CLI does not fetch or open a submitted URL, contact reputation services, inspect page content, or determine that a link is safe. No warnings means only that these few local checks found no listed signal. A warning is not proof of malicious intent.
 
 Examples:
 
@@ -24,7 +32,10 @@ pnpm install
 pnpm dev -- https://example.com
 pnpm dev -- http://127.0.0.1/login
 pnpm dev -- https://user@example.com
+pnpm dev -- --reputation https://example.com
+pnpm dev -- --reputation-health
 pnpm check
+pnpm test
 ```
 
 The service uses Node's built-in TypeScript type stripping for development (`node --experimental-strip-types`). The root package is an npm-style workspace managed with pnpm. TypeScript and Node types are service dev dependencies. Keep tooling compatible with the Node version in use and avoid adding unnecessary build-script dependencies.
