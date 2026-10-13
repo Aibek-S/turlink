@@ -22,7 +22,7 @@ export interface KeyHealthResult {
 }
 
 export type FetchLike = typeof fetch;
-const VIRUSTOTAL_API_ROOT = "https://www.virustotal.com/api/v3";
+const VIRUSTOTAL_API_ROOT = process.env.VIRUSTOTAL_API_ROOT;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -50,7 +50,7 @@ function headers(apiKey: string): HeadersInit {
 
 export async function lookupDomainReputation(domain: string, apiKey: string | undefined, request: FetchLike = fetch): Promise<ReputationResult> {
   const key = getApiKey(apiKey);
-  if (!key) return { status: "not-configured", message: "VirusTotal reputation lookup was not run because VIRUSTOTAL_API_KEY is not configured." };
+  if (!key) return { status: "not-configured", message: "VirusTotal reputation lookup was not run because VIRUSTOTAL_API_KEY is not configured. OKAY" };
 
   let response: Response;
   try {

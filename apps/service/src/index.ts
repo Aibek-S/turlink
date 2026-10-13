@@ -2,8 +2,8 @@ import { inspectLink, isIpAddress, normalizeDomain } from "./link-inspector.ts";
 import { checkVirusTotalKey, lookupDomainReputation, type AnalysisStats, type ReputationResult } from "./reputation.ts";
 
 function printUsage(): void {
-  console.log("Usage: pnpm dev -- [--reputation] <url>");
-  console.log("       pnpm dev -- --reputation-health");
+  console.log("Usage: pnpm dev [--reputation] <url>");
+  console.log("       pnpm dev --reputation-health");
   console.log("Checks a URL for visible warning signs. This is not a malware or safety guarantee.");
 }
 
@@ -68,7 +68,7 @@ async function main(args: string[]): Promise<number> {
   const domain = normalizeDomain(result.url!.hostname);
   if (isIpAddress(domain)) {
     console.log("VirusTotal: reputation lookup skipped because this feature accepts domain names, not IP addresses.");
-    return 0;
+    return 0; // TODO: we need to make sure that before lookupDomainReputation() domain is existing domain with needed protocol.
   }
   console.log("Privacy notice: this lookup sends only the hostname to VirusTotal, an external service. VirusTotal may add queried indicators to its dataset. Do not query sensitive, confidential, or personally identifiable domains.");
   const reputationResult = await lookupDomainReputation(domain, process.env.VIRUSTOTAL_API_KEY);
