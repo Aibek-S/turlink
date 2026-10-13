@@ -6,7 +6,6 @@ export interface LinkInspection {
 
 export function inspectLink(input: string): LinkInspection {
   let url: URL;
-  input = normalizeDomain(input)
 
   try {
     url = new URL(input);

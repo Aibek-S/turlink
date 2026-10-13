@@ -1,4 +1,4 @@
-export type ReputationStatus = "success" | "not-configured" | "authentication-failed" | "no-report" | "rate-limited" | "network-error" | "malformed-response" | "api-error";
+export type ReputationStatus = "success" | "not-configured" | "authentication-failed" | "no-report" | "rate-limited" | "network-error" | "malformed-response" | "api-error" | "basic-inspection-exception";
 
 export interface AnalysisStats {
   malicious: number | null;
@@ -13,11 +13,6 @@ export interface ReputationResult {
   stats?: AnalysisStats;
   lastAnalysisAt?: string;
   reportUrl?: string;
-  message: string;
-}
-
-export interface KeyHealthResult {
-  status: Exclude<ReputationStatus, "success" | "no-report"> | "success";
   message: string;
 }
 
@@ -72,7 +67,7 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
 
   const attributes = payload.data.attributes;
   const rawStats = attributes.last_analysis_stats;
-  if (rawStats !== undefined && !isRecord(rawStats)) return { status: "malformed-response", message: "VirusTotal returned invalid analysis statistics." };
+  if (rawStats !== undefined && !isRecord(rawStats)) return { status: "malformed-response", message: "VirusTotal returned inv alid analysis statistics." };
   const stats: AnalysisStats | undefined = rawStats ? {
     malicious: readStat(rawStats.malicious), suspicious: readStat(rawStats.suspicious),
     harmless: readStat(rawStats.harmless), undetected: readStat(rawStats.undetected),
@@ -82,9 +77,12 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
   return { status: "success", domain, stats, lastAnalysisAt, reportUrl: `https://www.virustotal.com/gui/domain/${encodeURIComponent(domain)}`, message: "VirusTotal domain report retrieved." };
 }
 
-export async function checkVirusTotalKey(apiKey: string | undefined, request: FetchLike = fetch): Promise<KeyHealthResult> {
+export async function checkVirusTotalKey(apiKey: string | undefined, request: FetchLike = fetch): Promise<ReputationResult | boolean > { // check returning type, shall we create new? 
   const key = getApiKey(apiKey);
   if (!key) return { status: "not-configured", message: "VIRUSTOTAL_API_KEY is not configured." };
+  return true
+  /*
+  DO WE NEED THIS? TODO
   let response: Response;
   try {
     response = await request(`${VIRUSTOTAL_API_ROOT}/metadata`, { headers: headers(key) });
@@ -94,4 +92,5 @@ export async function checkVirusTotalKey(apiKey: string | undefined, request: Fe
   if (response.ok) return { status: "success", message: "VirusTotal API key is accepted." };
   const error = resultForStatus(response.status);
   return { status: error.status === "no-report" ? "api-error" : error.status, message: error.message };
+  */ 
 }
