@@ -1,8 +1,4 @@
-export interface LinkInspection {
-  url: URL | null;
-  warnings: string[];
-  error?: string;
-}
+import { type LinkInspection } from "./types.ts";
 
 export function inspectLink(input: string): LinkInspection {
   let url: URL;
@@ -31,5 +27,5 @@ export function isIpAddress(hostname: string): boolean {
 }
 
 export function normalizeDomain(hostname: string): string {
-  return hostname.toLowerCase().replace(/\.$/, "");
+  return hostname.trim().replace(/\.$/, "");
 }

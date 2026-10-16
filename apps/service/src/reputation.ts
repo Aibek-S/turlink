@@ -1,26 +1,14 @@
-export type ReputationStatus = "success" | "not-configured" | "authentication-failed" | "no-report" | "rate-limited" | "network-error" | "malformed-response" | "api-error" | "basic-inspection-exception";
+import { type AnalysisStats, type FetchLike, type ReputationResult } from "./types.ts";
 
-export interface AnalysisStats {
-  malicious: number | null;
-  suspicious: number | null;
-  harmless: number | null;
-  undetected: number | null;
-}
-
-export interface ReputationResult {
-  status: ReputationStatus;
-  domain?: string;
-  stats?: AnalysisStats;
-  lastAnalysisAt?: string;
-  reportUrl?: string;
-  message: string;
-}
-
-export type FetchLike = typeof fetch;
 const VIRUSTOTAL_API_ROOT = process.env.VIRUSTOTAL_API_ROOT;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype
+  );
 }
 
 function readStat(value: unknown): number | null {
@@ -64,25 +52,22 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
   if (!isRecord(payload) || !isRecord(payload.data) || !isRecord(payload.data.attributes)) {
     return { status: "malformed-response", message: "VirusTotal returned an unexpected domain report." };
   }
-
   const attributes = payload.data.attributes;
   const rawStats = attributes.last_analysis_stats;
-  if (rawStats !== undefined && !isRecord(rawStats)) return { status: "malformed-response", message: "VirusTotal returned inv alid analysis statistics." };
-  const stats: AnalysisStats | undefined = rawStats ? {
+  if (!isRecord(rawStats)) // rawStats ==== undefined will return malformed-response.
+    return { status: "malformed-response", message: "VirusTotal returned invalid analysis statistics." };
+  const stats: AnalysisStats = {
     malicious: readStat(rawStats.malicious), suspicious: readStat(rawStats.suspicious),
     harmless: readStat(rawStats.harmless), undetected: readStat(rawStats.undetected),
-  } : undefined;
+  };
   const lastAnalysisAt = typeof attributes.last_analysis_date === "number" ? new Date(attributes.last_analysis_date * 1_000).toISOString() : undefined;
 
   return { status: "success", domain, stats, lastAnalysisAt, reportUrl: `https://www.virustotal.com/gui/domain/${encodeURIComponent(domain)}`, message: "VirusTotal domain report retrieved." };
 }
 
-export async function checkVirusTotalKey(apiKey: string | undefined, request: FetchLike = fetch): Promise<ReputationResult | boolean > { // check returning type, shall we create new? 
+export async function checkVirusTotalKey(apiKey: string | undefined, request: FetchLike = fetch): Promise<ReputationResult> {
   const key = getApiKey(apiKey);
   if (!key) return { status: "not-configured", message: "VIRUSTOTAL_API_KEY is not configured." };
-  return true
-  /*
-  DO WE NEED THIS? TODO
   let response: Response;
   try {
     response = await request(`${VIRUSTOTAL_API_ROOT}/metadata`, { headers: headers(key) });
@@ -91,6 +76,5 @@ export async function checkVirusTotalKey(apiKey: string | undefined, request: Fe
   }
   if (response.ok) return { status: "success", message: "VirusTotal API key is accepted." };
   const error = resultForStatus(response.status);
-  return { status: error.status === "no-report" ? "api-error" : error.status, message: error.message };
-  */ 
+  return { status: error.status === "no-report" ? "api-error" : error.status, message: error.message }; // error.status === "no-report" ? "api-error" : error.status this is because this endpoint is not returning 404 never
 }
