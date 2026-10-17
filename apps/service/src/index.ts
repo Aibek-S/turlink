@@ -9,13 +9,12 @@ const port = 3000
 
 app.use(express.json())
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (req: Request, res: Response) => {   
   res.json('ok')
-})
+}) 
 
 app.get("/detect/check", async (req: Request, res: Response) => {
   res.json(await checkVirusTotalKey(req.get("x-apikey")))
-  return
 })
 
 // TODO: put away all business logics in this endpoint. and change main() method's name
@@ -24,12 +23,10 @@ app.post('/detect', async (req: Request<{}, {}, DetectBodyDto>, res: Response) =
   if (!complicated) { // false and null
     const response = await main(req.body.url, "notComplicated")
     res.json(response)
-    return
   }
   else {
     const response = await main(req.body.url, "complicated")
     res.json(response)
-    return
   }
 })
 

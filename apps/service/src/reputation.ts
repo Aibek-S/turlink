@@ -1,6 +1,6 @@
-import { type AnalysisStats, type FetchLike, type ReputationResult } from "./types.ts";
+import { type CheckResult, type AnalysisStats, type ReputationResult } from "./types.ts";
 
-const VIRUSTOTAL_API_ROOT = process.env.VIRUSTOTAL_API_ROOT;
+const VIRUSTOTAL_API_ROOT = process.env.VIRUSTOTAL_API_ROOT
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return (
@@ -31,13 +31,13 @@ function headers(apiKey: string): HeadersInit {
   return { accept: "application/json", "x-apikey": apiKey };
 }
 
-export async function lookupDomainReputation(domain: string, apiKey: string | undefined, request: FetchLike = fetch): Promise<ReputationResult> {
+export async function lookupDomainReputation(domain: string, apiKey: string | undefined): Promise<ReputationResult> {
   const key = getApiKey(apiKey);
   if (!key) return { status: "not-configured", message: "VirusTotal reputation lookup was not run because VIRUSTOTAL_API_KEY is not configured. OKAY" };
 
   let response: Response;
   try {
-    response = await request(`${VIRUSTOTAL_API_ROOT}/domains/${encodeURIComponent(domain)}`, { headers: headers(key) });
+    response = await fetch(`${VIRUSTOTAL_API_ROOT}/domains/${encodeURIComponent(domain)}`, { headers: headers(key) });
   } catch {
     return { status: "network-error", message: "Could not reach VirusTotal. Check the network connection and try again." };
   }
@@ -65,12 +65,12 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
   return { status: "success", domain, stats, lastAnalysisAt, reportUrl: `https://www.virustotal.com/gui/domain/${encodeURIComponent(domain)}`, message: "VirusTotal domain report retrieved." };
 }
 
-export async function checkVirusTotalKey(apiKey: string | undefined, request: FetchLike = fetch): Promise<ReputationResult> {
+export async function checkVirusTotalKey(apiKey: string | undefined): Promise<CheckResult> {
   const key = getApiKey(apiKey);
   if (!key) return { status: "not-configured", message: "VIRUSTOTAL_API_KEY is not configured." };
   let response: Response;
   try {
-    response = await request(`${VIRUSTOTAL_API_ROOT}/metadata`, { headers: headers(key) });
+    response = await fetch(`${VIRUSTOTAL_API_ROOT}/metadata`, { headers: headers(key)});   // https://www.virustotal.com/api/v3/metadata
   } catch {
     return { status: "network-error", message: "Could not reach VirusTotal. Check the network connection and try again." };
   }

@@ -34,4 +34,7 @@ export interface ReputationResult {
   message: string;
 }
 
-export type FetchLike = typeof fetch;
+export interface CheckResult {
+  status: ReputationStatus;
+  message: string
+}
