@@ -1,6 +1,6 @@
 import { type LinkInspection } from "./types.ts";
 
-export function inspectLink(input: string): LinkInspection {
+export function basicInspection(input: string): LinkInspection {
   let url: URL;
 
   try {

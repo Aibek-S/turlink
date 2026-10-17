@@ -1,6 +1,6 @@
 import express from 'express'
 import type { Request, Response } from 'express'
-import { main } from './serivce.ts';
+import { inspection } from './serivce.ts';
 import type { DetectBodyDto, DetectionType } from './types.ts';
 import { checkVirusTotalKey } from './reputation.ts';
 
@@ -17,10 +17,10 @@ app.get("/detect/check", async (req: Request, res: Response) => {
   res.json(await checkVirusTotalKey(req.get("x-apikey")))
 })
 
-// TODO: put away all business logics in this endpoint. and change main() method's name
+
 app.post('/detect', async (req: Request<{}, {}, DetectBodyDto>, res: Response) => {
   const complicated: DetectionType = req.body.complicated
-  const response = await main(req.body.url, complicated)
+  const response = await inspection(req.body.url, complicated)
 })
 
 app.listen(3000, () => {

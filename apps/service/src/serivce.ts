@@ -1,5 +1,5 @@
 import type { DetectionResponse, DetectionType, LinkInspection, ReputationResult } from "./types.ts";
-import { inspectLink, normalizeDomain } from "./link-inspector.ts";
+import { basicInspection, normalizeDomain } from "./basic-inspector.ts";
 import { lookupDomainReputation} from "./reputation.ts";
 
 export function outerNormalize(linkInspection: LinkInspection, reputationResult?: ReputationResult): DetectionResponse {
@@ -9,10 +9,10 @@ export function outerNormalize(linkInspection: LinkInspection, reputationResult?
   }
 }
 
-export async function main(domainName: string, detectionType: DetectionType): Promise<DetectionResponse> {
+export async function inspection(domainName: string, detectionType: DetectionType): Promise<DetectionResponse> {
   const domain = normalizeDomain(domainName);
   if (detectionType == "complicated") {
-    const inspectionResult = inspectLink(domain)
+    const inspectionResult = basicInspection(domain)
     if (inspectionResult.error) {
       return outerNormalize(inspectionResult, {message: "Your request is inappropriate", status: "basic-inspection-exception"})
     }
@@ -20,7 +20,7 @@ export async function main(domainName: string, detectionType: DetectionType): Pr
     return outerNormalize(inspectionResult, reputationResult)
   }
   else { // undefined or notComplicated
-    const inspectionResult = inspectLink(domain)
+    const inspectionResult = basicInspection(domain)
     return outerNormalize(inspectionResult)
   }
 }
