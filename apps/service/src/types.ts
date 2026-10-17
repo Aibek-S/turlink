@@ -1,6 +1,6 @@
 export interface DetectBodyDto  {
   url: string;
-  complicated?: boolean;
+  complicated?: DetectionType;
 }
 
 export interface DetectionResponse {
