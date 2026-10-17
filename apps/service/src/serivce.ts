@@ -8,19 +8,19 @@ export function outerNormalize(linkInspection: LinkInspection, reputationResult?
     reputationResult: reputationResult
   }
 }
+
 export async function main(domainName: string, detectionType: DetectionType): Promise<DetectionResponse> {
-  
   const domain = normalizeDomain(domainName);
-  if (detectionType == "notComplicated") {
-    const inspectionResult = inspectLink(domain)
-    return outerNormalize(inspectionResult)
-  }
-  else { // domain check
+  if (detectionType == "complicated") {
     const inspectionResult = inspectLink(domain)
     if (inspectionResult.error) {
       return outerNormalize(inspectionResult, {message: "Your request is inappropriate", status: "basic-inspection-exception"})
     }
     const reputationResult = await lookupDomainReputation(domain, process.env.VIRUSTOTAL_API_KEY)
     return outerNormalize(inspectionResult, reputationResult)
+  }
+  else { // undefined or notComplicated
+    const inspectionResult = inspectLink(domain)
+    return outerNormalize(inspectionResult)
   }
 }

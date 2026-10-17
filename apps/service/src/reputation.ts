@@ -2,12 +2,12 @@ import { type CheckResult, type AnalysisStats, type ReputationResult } from "./t
 
 const VIRUSTOTAL_API_ROOT = process.env.VIRUSTOTAL_API_ROOT
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: unknown): value is Record<string, unknown> { // {...: ...}
   return (
     typeof value === "object" &&
     value !== null &&
     !Array.isArray(value) &&
-    Object.getPrototypeOf(value) === Object.prototype
+    Object.getPrototypeOf(value) === Object.prototype // check if value is Javascript Object
   );
 }
 
@@ -37,7 +37,7 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
 
   let response: Response;
   try {
-    response = await fetch(`${VIRUSTOTAL_API_ROOT}/domains/${encodeURIComponent(domain)}`, { headers: headers(key) });
+    response = await fetch(`${VIRUSTOTAL_API_ROOT}/domains/${encodeURIComponent(domain)}`, { headers: headers(key) });  
   } catch {
     return { status: "network-error", message: "Could not reach VirusTotal. Check the network connection and try again." };
   }
@@ -45,7 +45,7 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
 
   let payload: unknown;
   try {
-    payload = await response.json();
+    payload = await response.json(); 
   } catch {
     return { status: "malformed-response", message: "VirusTotal returned invalid JSON." };
   }
@@ -54,8 +54,9 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
   }
   const attributes = payload.data.attributes;
   const rawStats = attributes.last_analysis_stats;
-  if (!isRecord(rawStats)) // rawStats ==== undefined will return malformed-response.
+  if (!isRecord(rawStats)) { // rawStats ==== undefined will return malformed-response.
     return { status: "malformed-response", message: "VirusTotal returned invalid analysis statistics." };
+  }
   const stats: AnalysisStats = {
     malicious: readStat(rawStats.malicious), suspicious: readStat(rawStats.suspicious),
     harmless: readStat(rawStats.harmless), undetected: readStat(rawStats.undetected),

@@ -8,7 +8,7 @@ export interface DetectionResponse {
   reputationResult?: ReputationResult
 }
 
-export type DetectionType = "complicated" | "notComplicated"//TODO make external file for all interfaces, dto.
+export type DetectionType = "complicated" | "notComplicated" | undefined
 
 export interface LinkInspection {
   url: URL | null;

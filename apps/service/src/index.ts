@@ -19,15 +19,8 @@ app.get("/detect/check", async (req: Request, res: Response) => {
 
 // TODO: put away all business logics in this endpoint. and change main() method's name
 app.post('/detect', async (req: Request<{}, {}, DetectBodyDto>, res: Response) => {
-  const complicated = req.body.complicated
-  if (!complicated) { // false and null
-    const response = await main(req.body.url, "notComplicated")
-    res.json(response)
-  }
-  else {
-    const response = await main(req.body.url, "complicated")
-    res.json(response)
-  }
+  const complicated: boolean | undefined = req.body.complicated
+  const response = await main(req.body.url, complicated)
 })
 
 app.listen(3000, () => {
