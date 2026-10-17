@@ -20,7 +20,8 @@ app.get("/detect/check", async (req: Request, res: Response) => {
 
 app.post('/detect', async (req: Request<{}, {}, DetectBodyDto>, res: Response) => {
   const complicated: DetectionType = req.body.complicated
-  const response = await inspection(req.body.url, complicated)
+  const response = await inspection(req.body.url, complicated, req.get("x-apikey"))
+  res.json(response)
 })
 
 app.listen(3000, () => {

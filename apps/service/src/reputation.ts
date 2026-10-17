@@ -33,7 +33,7 @@ function headers(apiKey: string): HeadersInit {
 
 export async function lookupDomainReputation(domain: string, apiKey: string | undefined): Promise<ReputationResult> {
   const key = getApiKey(apiKey);
-  if (!key) return { status: "not-configured", message: "VirusTotal reputation lookup was not run because VIRUSTOTAL_API_KEY is not configured. OKAY" };
+  if (!key) return { status: "not-configured", message: "VirusTotal reputation lookup was not run because VIRUSTOTAL_API_KEY is not configured." };
 
   let response: Response;
   try {
