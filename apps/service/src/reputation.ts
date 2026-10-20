@@ -20,6 +20,11 @@ function getApiKey(apiKey: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+async function responseLogger(response: Response): Promise<void> {
+  const res: any = await response.json()
+  console.debug(`[RESPONSELOGGER] ${res}`)
+}
+
 function resultForStatus(status: number): ReputationResult {
   if (status === 401 || status === 403) return { status: "authentication-failed", message: "VirusTotal rejected the API key. Check VIRUSTOTAL_API_KEY and its access." };
   if (status === 404) return { status: "no-report", message: "VirusTotal has no domain report for this hostname." };
@@ -41,14 +46,18 @@ export async function lookupDomainReputation(domain: string, apiKey: string | un
   } catch {
     return { status: "network-error", message: "Could not reach VirusTotal. Check the network connection and try again." };
   }
-  if (!response.ok) return resultForStatus(response.status);
-
+  
   let payload: unknown;
   try {
     payload = await response.json(); 
   } catch {
     return { status: "malformed-response", message: "VirusTotal returned invalid JSON." };
   }
+  if (!response.ok) { 
+    const errorResult = resultForStatus(response.status)
+    errorResult.message += `Response body: ${JSON.stringify(payload)}`
+    return errorResult
+  } 
   if (!isRecord(payload) || !isRecord(payload.data) || !isRecord(payload.data.attributes)) {
     return { status: "malformed-response", message: "VirusTotal returned an unexpected domain report." };
   }

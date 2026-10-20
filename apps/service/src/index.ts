@@ -19,11 +19,15 @@ app.get("/detect/check", async (req: Request, res: Response) => {
 
 
 app.post('/detect', async (req: Request<{}, {}, DetectBodyDto>, res: Response) => {
-  const complicated: DetectionType = req.body.complicated
-  const response = await inspection(req.body.url, complicated, req.get("x-apikey"))
+  const response = await inspection(req.body.url, req.body.complicated, req.get("x-apikey"))
   res.json(response)
 })
 
-app.listen(3000, () => {
-  console.log("Working on :3000 port")
+app.listen(3000, (error) => {
+  if (!error) {
+    console.log("Working on :3000 port")
+  }
+  else {
+    console.log(error)
+  }
 })
