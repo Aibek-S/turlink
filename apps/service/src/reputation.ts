@@ -20,11 +20,6 @@ function getApiKey(apiKey: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-async function responseLogger(response: Response): Promise<void> {
-  const res: any = await response.json()
-  console.debug(`[RESPONSELOGGER] ${res}`)
-}
-
 function resultForStatus(status: number): ReputationResult {
   if (status === 401 || status === 403) return { status: "authentication-failed", message: "VirusTotal rejected the API key. Check VIRUSTOTAL_API_KEY and its access." };
   if (status === 404) return { status: "no-report", message: "VirusTotal has no domain report for this hostname." };
@@ -36,10 +31,17 @@ function headers(apiKey: string): HeadersInit {
   return { accept: "application/json", "x-apikey": apiKey };
 }
 
+function removeProtocol(domain: string): string {
+  if (!domain.includes("https://", 0)) return domain;
+  return domain.substring(8)
+}
+
 export async function lookupDomainReputation(domain: string, apiKey: string | undefined): Promise<ReputationResult> {
   const key = getApiKey(apiKey);
   if (!key) return { status: "not-configured", message: "VirusTotal reputation lookup was not run because VIRUSTOTAL_API_KEY is not configured." };
 
+  domain = removeProtocol(domain) // temporary fix
+  
   let response: Response;
   try {
     response = await fetch(`${VIRUSTOTAL_API_ROOT}/domains/${encodeURIComponent(domain)}`, { headers: headers(key) });  
